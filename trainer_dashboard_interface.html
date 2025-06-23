@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Formateur - Trainer Bootcamp Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.8.0/Recharts.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .profile-header {
+            padding: 0 2rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 auto 1rem;
+            position: relative;
+        }
+
+        .profile-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-status {
+            color: #10b981;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            color: #374151;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .welcome-banner {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-subtitle {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .calendar-header {
+            font-weight: 600;
+            color: #6b7280;
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.has-session {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .calendar-day.has-session::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        .upcoming-sessions {
+            space-y: 1rem;
+        }
+
+        .session-item {
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .session-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .session-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .session-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .session-bootcamp {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .session-time {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .session-meta {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f9fafb;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .profile-completion {
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .completion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .completion-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .completion-percentage {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .completion-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .completion-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .completion-item.completed {
+            color: #10b981;
+        }
+
+        .completion-item.incomplete {
+            color: #6b7280;
+        }
+
+        .earnings-summary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .earnings-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .earnings-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .earnings-period {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .chart-container {
+            height: 250px;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="trainer-dashboard"></div>
+
+    <script>
+        const { useState, useEffect, createElement: h } = React;
+        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+
+        // Données de démonstration pour le formateur
+        const trainerData = {
+            profile: {
+                name: "Marie Dubois",
+                email: "marie.dubois@email.com",
+                expertise: "Développement Web",
+                rating: 4.8,
+                totalSessions: 142,
+                completionRate: 85
+            },
+            stats: [
+                {
+                    label: "Sessions ce mois",
+                    value: 12,
+                    icon: "📅"
+                },
+                {
+                    label: "Heures enseignées",
+                    value: 48,
+                    icon: "⏰"
+                },
+                {
+                    label: "Étudiants formés",
+                    value: 156,
+                    icon: "👥"
+                },
+                {
+                    label: "Note moyenne",
+                    value: "4.8/5",
+                    icon: "⭐"
+                }
+            ],
+            upcomingSessions: [
+                {
+                    id: 1,
+                    title: "React.js Avancé",
+                    bootcamp: "Bootcamp Full Stack",
+                    date: "2024-01-20",
+                    time: "14:00-17:00",
+                    participants: 15,
+                    format: "En ligne"
+                },
+                {
+                    id: 2,
+                    title: "Projet Final",
+                    bootcamp: "Bootcamp Web Design",
+                    date: "2024-01-22",
+                    time: "09:00-12:00",
+                    participants: 12,
+                    format: "Présentiel"
+                },
+                {
+                    id: 3,
+                    title: "Node.js & Express",
+                    bootcamp: "Bootcamp Backend",
+                    date: "2024-01-25",
+                    time: "10:00-13:00",
+                    participants: 18,
+                    format: "Hybride"
+                }
+            ],
+            earnings: {
+                thisMonth: 2850,
+                lastMonth: 2650,
+                currency: "€",
+                chartData: [
+                    { month: 'Jan', earnings: 2400 },
+                    { month: 'Fév', earnings: 2650 },
+                    { month: 'Mar', earnings: 2100 },
+                    { month: 'Avr', earnings: 2850 },
+                    { month: 'Mai', earnings: 3200 },
+                    { month: 'Jun', earnings: 2850 }
+                ]
+            },
+            profileCompletion: {
+                percentage: 85,
+                items: [
+                    { label: "Informations personnelles", completed: true },
+                    { label: "Photo de profil", completed: true },
+                    { label: "CV téléchargé", completed: true },
+                    { label: "Compétences définies", completed: true },
+                    { label: "Disponibilités mises à jour", completed: false },
+                    { label: "Portfolio ajouté", completed: false }
+                ]
+            }
+        };
+
+        // Composant principal du dashboard formateur
+        function TrainerDashboard() {
+            const [activeMenu, setActiveMenu] = useState('dashboard');
+
+            const menuItems = [
+                { id: 'dashboard', label: 'Tableau de bord', icon: '📊' },
+                { id: 'profile', label: 'Mon profil', icon: '👤' },
+                { id: 'calendar', label: 'Planning', icon: '📅' },
+                { id: 'sessions', label: 'Mes sessions', icon: '🎓' },
+                { id: 'earnings', label: 'Revenus', icon: '💰' },
+                { id: 'documents', label: 'Documents', icon: '📄' },
+                { id: 'messages', label: 'Messages', icon: '💬' },
+                { id: 'settings', label: 'Paramètres', icon: '⚙️' }
+            ];
+
+            return h('div', { className: 'dashboard-container' },
+                // Sidebar
+                h('aside', { className: 'sidebar' },
+                    h('div', { className: 'profile-header' },
+                        h('div', { className: 'profile-avatar' },
+                            'MD'
+                        ),
+                        h('div', { className: 'profile-name' }, trainerData.profile.name),
+                        h('div', { className: 'profile-status' }, '● En ligne')
+                    ),
+                    h('nav', null,
+                        h('ul', { className: 'nav-menu' },
+                            menuItems.map(item =>
+                                h('li', { key: item.id, className: 'nav-item' },
+                                    h('a',
+                                        {
+                                            href: '#',
+                                            className: `nav-link ${activeMenu === item.id ? 'active' : ''}`,
+                                            onClick: (e) => {
+                                                e.preventDefault();
+                                                setActiveMenu(item.id);
+                                            }
+                                        },
+                                        h('span', null, item.icon),
+                                        item.label
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                // Contenu principal
+                h('main', { className: 'main-content' },
+                    activeMenu === 'dashboard' && h(DashboardContent, { data: trainerData }),
+                    activeMenu === 'profile' && h(ProfileContent, { profile: trainerData.profile }),
+                    activeMenu === 'calendar' && h(CalendarContent, { sessions: trainerData.upcomingSessions }),
+                    activeMenu === 'sessions' && h(SessionsContent, { sessions: trainerData.upcomingSessions }),
+                    activeMenu === 'earnings' && h(EarningsContent, { earnings: trainerData.earnings })
+                )
+            );
+        }
+
+        // Composant contenu dashboard
+        function DashboardContent({ data }) {
+            return h('div', null,
+                // Bannière de bienvenue
+                h('div', { className: 'welcome-banner' },
+                    h('h1', { className: 'welcome-title' }, `Bonjour ${data.profile.name.split(' ')[0]} ! 👋`),
+                    h('p', { className: 'welcome-subtitle' }, 'Voici un résumé de votre activité aujourd\'hui')
+                ),
+
+                // Statistiques
+                h('div', { className: 'stats-grid' },
+                    data.stats.map((stat, index) =>
+                        h('div', { key: index, className: 'stat-card' },
+                            h('div', { className: 'stat-header' },
+                                h('div', { className: 'stat-icon' }, stat.icon)
+                            ),
+                            h('div', { className: 'stat-value' }, stat.value),
+                            h('div', { className: 'stat-label' }, stat.label)
+                        )
+                    )
+                ),
+
+                // Grille de contenu
+                h('div', { className: 'content-grid' },
+                    // Prochaines sessions
+                    h('div', { className: 'card' },
+                        h('div', { className: 'card-header' },
+                            h('h3', { className: 'card-title' }, 'Prochaines sessions'),
+                            h('button', { className: 'btn btn-primary' }, '+ Nouvelle session')
+                        ),
+                        h('div', { className: 'upcoming-sessions' },
+                            data.upcomingSessions.slice(0, 3).map(session =>
+                                h('div', { key: session.id, className: 'session-item' },
+                                    h('div', { className: 'session-header' },
+                                        h('div', null,
+                                            h('div', { className: 'session-title' }, session.title),
+                                            h('div', { className: 'session-bootcamp' }, session.bootcamp)
+                                        ),
+                                        h('div', { className: 'session-time' }, session.time)
+                                    ),
+                                    h('div', { className: 'session-meta' },
+                                        h('span', null, `📅 ${formatDate(session.date)}`),
+                                        h('span', null, `👥 ${session.participants} participants`),
+                                        h('span', null, `📍 ${session.format}`)
+                                    ),
+                                    h('div', { className: 'session-actions' },
+                                        h('button', { className: 'btn btn-primary' }, 'Rejoindre'),
+                                        h('button', { className: 'btn btn-secondary' }, 'Détails')
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    // Sidebar droite
+                    h('div', null,
+                        // Complétion du profil
+                        h('div', { className: 'profile-completion' },
+                            h('div', { className: 'completion-header' },
+                                h('div', { className: 'completion-title' }, 'Complétion du profil'),
+                                h('div', { className: 'completion-percentage' }, `${data.profileCompletion.percentage}%`)
+                            ),
+                            h('div', { className: 'progress-bar' },
+                                h('div', { 
+                                    className: 'progress-fill',
+                                    style: { width: `${data.profileCompletion.percentage}%` }
+                                })
+                            ),
+                            h('div', { className: 'completion-items' },
+                                data.profileCompletion.items.map((item, index) =>
+                                    h('div', { 
+                                        key: index, 
+                                        className: `completion-item ${item.completed ? 'completed' : 'incomplete'}`
+                                    },
+                                        h('span', null, item.completed ? '✅' : '⭕'),
+                                        item.label
+                                    )
+                                )
+                            )
+                        ),
+
+                        // Résumé des revenus
+                        h('div', { className: 'earnings-summary' },
+                            h('div', { className: 'earnings-title' }, 'Revenus ce mois'),
+                            h('div', { className: 'earnings-amount' }, `${data.earnings.thisMonth}${data.earnings.currency}`),
+                            h('div', { className: 'earnings-period' }, 
+                                `+${((data.earnings.thisMonth - data.earnings.lastMonth) / data.earnings.lastMonth * 100).toFixed(1)}% vs mois dernier`
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        // Composant contenu profil
+        function ProfileContent({ profile }) {
+            return h('div', null,
+                h('div', { className: 'welcome-banner' },
+                    h('h1', { className: 'welcome-title' }, 'Mon Profil'),
+                    h('p', { className: 'welcome-subtitle' }, 'Gérez vos informations personnelles et professionnelles')
+                ),
+                h('div', { className: 'card' },
+                    h('div', { className: 'card-header' },
+                        h('h3', { className: 'card-title' }, 'Informations personnelles')
+                    ),
+                    h('div', null, 'Formulaire d\'édition du profil à implémenter...')
+                )
+            );
+        }
+
+        // Composant contenu calendrier
+        function CalendarContent({ sessions }) {
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            
+            return h('div', null,
+                h('div', { className: 'welcome-banner' },
+                    h('h1', { className: 'welcome-title' }, 'Mon Planning'),
+                    h('p', { className: 'welcome-subtitle' }, 'Gérez vos disponibilités et sessions')
+                ),
+                h('div', { className: 'card' },
+                    h('div', { className: 'card-header' },
+                        h('h3', { className: 'card-title' }, `${getMonthName(currentMonth)} ${currentYear}`)
+                    ),
+                    h('div', { className: 'calendar' },
+                        ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day =>
+                            h('div', { key: day, className: 'calendar-header' }, day)
+                        ),
+                        generateCalendarDays(currentYear, currentMonth, sessions)
+                    )
+                )
+            );
+        }
+
+        // Composant contenu sessions
+        function SessionsContent({ sessions }) {
+            return h('div', null,
+                h('div', { className: 'welcome-banner' },
+                    h('h1', { className: 'welcome-title' }, 'Mes Sessions'),
+                    h('p', { className: 'welcome-subtitle' }, 'Toutes vos sessions passées et à venir')
+                ),
+                h('div', { className: 'card' },
+                    h('div', { className: 'card-header' },
+                        h('h3', { className: 'card-title' }, 'Sessions à venir')
+                    ),
+                    h('div', { className: 'upcoming-sessions' },
+                        sessions.map(session =>
+                            h('div', { key: session.id, className: 'session-item' },
+                                h('div', { className: 'session-header' },
+                                    h('div', null,
+                                        h('div', { className: 'session-title' }, session.title),
+                                        h('div', { className: 'session-bootcamp' }, session.bootcamp)
+                                    ),
+                                    h('div', { className: 'session-time' }, session.time)
+                                ),
+                                h('div', { className: 'session-meta' },
+                                    h('span', null, `📅 ${formatDate(session.date)}`),
+                                    h('span', null, `👥 ${session.participants} participants`),
+                                    h('span', null, `📍 ${session.format}`)
+                                ),
+                                h('div', { className: 'session-actions' },
+                                    h('button', { className: 'btn btn-primary' }, 'Rejoindre'),
+                                    h('button', { className: 'btn btn-secondary' }, 'Éditer'),
+                                    h('button', { className: 'btn btn-secondary' }, 'Annuler')
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        // Composant contenu revenus
+        function EarningsContent({ earnings }) {
+            return h('div', null,
+                h('div', { className: 'welcome-banner' },
+                    h('h1', { className: 'welcome-title' }, 'Mes Revenus'),
+                    h('p', { className: 'welcome-subtitle' }, 'Suivez vos gains et paiements')
+                ),
+                h('div', { className: 'card' },
+                    h('div', { className: 'card-header' },
+                        h('h3', { className: 'card-title' }, 'Évolution des revenus')
+                    ),
+                    h('div', { className: 'chart-container' },
+                        h(ResponsiveContainer, { width: '100%', height: '100%' },
+                            h(LineChart, { data: earnings.chartData },
+                                h(CartesianGrid, { strokeDasharray: '3 3' }),
+                                h(XAxis, { dataKey: 'month' }),
+                                h(YAxis, null),
+                                h(Tooltip, null),
+                                h(Line, { 
+                                    type: 'monotone', 
+                                    dataKey: 'earnings', 
+                                    stroke: '#667eea', 
+                                    strokeWidth: 3,
+                                    dot: { fill: '#667eea', strokeWidth: 2, r: 6 }
+                                })
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        // Fonctions utilitaires
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function getMonthName(month) {
+            const months = [
+                'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+            ];
+            return months[month];
+        }
+
+        function generateCalendarDays(year, month, sessions) {
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - (firstDay.getDay() || 7) + 1);
+            
+            const days = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 42; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+                
+                const isToday = currentDate.toDateString() === today.toDateString();
+                const isCurrentMonth = currentDate.getMonth() === month;
+                const hasSession = sessions.some(session => 
+                    new Date(session.date).toDateString() === currentDate.toDateString()
+                );
+                
+                let className = 'calendar-day';
+                if (isToday) className += ' today';
+                if (hasSession) className += ' has-session';
+                if (!isCurrentMonth) className += ' other-month';
+                
+                days.push(
+                    h('div', { 
+                        key: i, 
+                        className: className,
+                        style: { opacity: isCurrentMonth ? 1 : 0.3 }
+                    }, currentDate.getDate())
+                );
+            }
+            
+            return days;
+        }
+
+        // Rendu de l'application
+        ReactDOM.render(
+            React.createElement(TrainerDashboard),
+            document.getElementById('trainer-dashboard')
+        );
+    </script>
+</body>
+</html>

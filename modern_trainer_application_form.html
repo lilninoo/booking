@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devenir Formateur - Inscription</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .application-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="pattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23pattern)"/></svg>') repeat;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 3rem 2rem 2rem;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input.error, select.error, textarea.error {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        input.success, select.success, textarea.success {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .success-message {
+            color: #10b981;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .file-label:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .file-label.has-file {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #065f46;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+        }
+
+        .file-text {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .file-size {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .skill-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .skill-checkbox:hover {
+            background: #f3f4f6;
+        }
+
+        .skill-checkbox.selected {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .skill-checkbox input {
+            width: auto;
+            margin: 0;
+        }
+
+        .custom-skills {
+            margin-top: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f9fafb;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .summary-section {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #6b7280;
+        }
+
+        .summary-value {
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .success-animation {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #10b981;
+            margin-bottom: 1rem;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .application-container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="trainer-application"></div>
+
+    <script>
+        const { useState, useEffect, createElement: h } = React;
+
+        // Configuration des étapes
+        const steps = [
+            {
+                id: 'personal',
+                title: 'Informations personnelles',
+                description: 'Parlez-nous de vous et de votre localisation'
+            },
+            {
+                id: 'professional',
+                title: 'Expérience professionnelle',
+                description: 'Décrivez votre expertise et votre parcours'
+            },
+            {
+                id: 'skills',
+                title: 'Compétences techniques',
+                description: 'Sélectionnez vos domaines d\'expertise'
+            },
+            {
+                id: 'documents',
+                title: 'Documents',
+                description: 'Téléchargez votre CV et portfolio'
+            },
+            {
+                id: 'summary',
+                title: 'Récapitulatif',
+                description: 'Vérifiez vos informations avant envoi'
+            }
+        ];
+
+        // Liste des compétences prédéfinies
+        const predefinedSkills = [
+            'HTML/CSS', 'JavaScript', 'React.js', 'Vue.js', 'Angular', 'Node.js',
+            'Python', 'PHP', 'Java', 'C#', 'MySQL', 'PostgreSQL', 'MongoDB',
+            'AWS', 'Azure', 'Docker', 'Kubernetes', 'Git', 'DevOps', 'CI/CD',
+            'Machine Learning', 'Data Science', 'UX/UI Design', 'Figma', 'Adobe Suite',
+            'Project Management', 'Agile/Scrum', 'Digital Marketing', 'SEO'
+        ];
+
+        // Pays
+        const countries = [
+            'France', 'Belgique', 'Suisse', 'Canada', 'Maroc', 'Tunisie', 'Algérie',
+            'Sénégal', 'Côte d\'Ivoire', 'Madagascar', 'Luxembourg', 'Monaco'
+        ];
+
+        // Domaines d'expertise
+        const expertiseAreas = [
+            'Développement Web', 'Développement Mobile', 'Data Science', 'Intelligence Artificielle',
+            'Cybersécurité', 'Cloud Computing', 'DevOps', 'UX/UI Design', 'Digital Marketing',
+            'E-commerce', 'Blockchain', 'IoT', 'Gestion de Projet', 'Business Intelligence'
+        ];
+
+        // Composant principal
+        function TrainerApplication() {
+            const [currentStep, setCurrentStep] = useState(0);
+            const [formData, setFormData] = useState({
+                // Étape 1: Personnel
+                firstName: '',
+                lastName: '',
+                email: '',
+                phone: '',
+                country: '',
+                city: '',
+                
+                // Étape 2: Professionnel
+                expertise: '',
+                experienceYears: '',
+                motivation: '',
+                portfolioUrl: '',
+                linkedinUrl: '',
+                expectedRate: '',
+                currency: 'EUR',
+                availability: '',
+                
+                // Étape 3: Compétences
+                skills: [],
+                customSkills: '',
+                
+                // Étape 4: Documents
+                cv: null,
+                coverLetter: null
+            });
+            const [errors, setErrors] = useState({});
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [submitted, setSubmitted] = useState(false);
+
+            const progress = ((currentStep + 1) / steps.length) * 100;
+
+            const updateField = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+                // Clear error when user starts typing
+                if (errors[field]) {
+                    setErrors(prev => ({ ...prev, [field]: null }));
+                }
+            };
+
+            const validateStep = (stepIndex) => {
+                const newErrors = {};
+
+                switch (stepIndex) {
+                    case 0: // Personal
+                        if (!formData.firstName.trim()) newErrors.firstName = 'Prénom requis';
+                        if (!formData.lastName.trim()) newErrors.lastName = 'Nom requis';
+                        if (!formData.email.trim()) {
+                            newErrors.email = 'Email requis';
+                        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+                            newErrors.email = 'Email invalide';
+                        }
+                        if (!formData.country) newErrors.country = 'Pays requis';
+                        break;
+
+                    case 1: // Professional
+                        if (!formData.expertise) newErrors.expertise = 'Domaine d\'expertise requis';
+                        if (!formData.experienceYears) {
+                            newErrors.experienceYears = 'Années d\'expérience requises';
+                        } else if (formData.experienceYears < 1 || formData.experienceYears > 50) {
+                            newErrors.experienceYears = 'Entre 1 et 50 ans d\'expérience';
+                        }
+                        if (!formData.motivation.trim() || formData.motivation.length < 100) {
+                            newErrors.motivation = 'Motivation requise (minimum 100 caractères)';
+                        }
+                        break;
+
+                    case 2: // Skills
+                        if (formData.skills.length === 0 && !formData.customSkills.trim()) {
+                            newErrors.skills = 'Sélectionnez au moins une compétence';
+                        }
+                        break;
+
+                    case 3: // Documents
+                        if (!formData.cv) {
+                            newErrors.cv = 'CV requis';
+                        }
+                        break;
+                }
+
+                setErrors(newErrors);
+                return Object.keys(newErrors).length === 0;
+            };
+
+            const nextStep = () => {
+                if (validateStep(currentStep)) {
+                    setCurrentStep(prev => prev + 1);
+                }
+            };
+
+            const prevStep = () => {
+                setCurrentStep(prev => prev - 1);
+            };
+
+            const handleSkillToggle = (skill) => {
+                setFormData(prev => ({
+                    ...prev,
+                    skills: prev.skills.includes(skill)
+                        ? prev.skills.filter(s => s !== skill)
+                        : [...prev.skills, skill]
+                }));
+            };
+
+            const handleFileUpload = (field, file) => {
+                if (file) {
+                    // Validation du fichier
+                    const maxSize = 10 * 1024 * 1024; // 10MB
+                    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+                    if (file.size > maxSize) {
+                        setErrors(prev => ({ ...prev, [field]: 'Fichier trop volumineux (max 10MB)' }));
+                        return;
+                    }
+
+                    if (!allowedTypes.includes(file.type)) {
+                        setErrors(prev => ({ ...prev, [field]: 'Type de fichier non supporté (PDF, DOC, DOCX)' }));
+                        return;
+                    }
+
+                    updateField(field, file);
+                }
+            };
+
+            const submitApplication = async () => {
+                if (!validateStep(currentStep - 1)) return;
+
+                setIsSubmitting(true);
+
+                try {
+                    // Simulation d'appel API
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Préparer les données pour l'API
+                    const apiData = {
+                        first_name: formData.firstName,
+                        last_name: formData.lastName,
+                        email: formData.email,
+                        phone: formData.phone,
+                        country: formData.country,
+                        city: formData.city,
+                        expertise: formData.expertise,
+                        experience_years: parseInt(formData.experienceYears),
+                        motivation: formData.motivation,
+                        portfolio_url: formData.portfolioUrl,
+                        linkedin_url: formData.linkedinUrl,
+                        expected_rate: parseFloat(formData.expectedRate),
+                        currency: formData.currency,
+                        availability: formData.availability,
+                        skills: [...formData.skills, ...formData.customSkills.split(',').map(s => s.trim()).filter(s => s)].join(', ')
+                    };
+
+                    console.log('Envoi des données:', apiData);
+
+                    // Ici, on ferait l'appel API réel
+                    // const response = await fetch('/wp-json/tbm/v1/applications', {
+                    //     method: 'POST',
+                    //     headers: { 'Content-Type': 'application/json' },
+                    //     body: JSON.stringify(apiData)
+                    // });
+
+                    setSubmitted(true);
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    setErrors({ submit: 'Erreur lors de l\'envoi. Veuillez réessayer.' });
+                } finally {
+                    setIsSubmitting(false);
+                }
+            };
+
+            if (submitted) {
+                return h(SuccessMessage);
+            }
+
+            return h('div', { className: 'application-container' },
+                h(Header, { progress, currentStep, steps }),
+                h('div', { className: 'form-container' },
+                    currentStep === 0 && h(PersonalStep, { formData, updateField, errors }),
+                    currentStep === 1 && h(ProfessionalStep, { formData, updateField, errors, expertiseAreas }),
+                    currentStep === 2 && h(SkillsStep, { 
+                        formData, 
+                        updateField, 
+                        errors, 
+                        predefinedSkills, 
+                        handleSkillToggle 
+                    }),
+                    currentStep === 3 && h(DocumentsStep, { formData, errors, handleFileUpload }),
+                    currentStep === 4 && h(SummaryStep, { formData }),
+                    
+                    h(Actions, { 
+                        currentStep, 
+                        stepsLength: steps.length,
+                        nextStep,
+                        prevStep,
+                        submitApplication,
+                        isSubmitting,
+                        errors
+                    })
+                )
+            );
+        }
+
+        // Composant Header
+        function Header({ progress, currentStep, steps }) {
+            return h('div', { className: 'header' },
+                h('div', { className: 'header-content' },
+                    h('h1', { className: 'title' }, '🎓 Devenir Formateur'),
+                    h('p', { className: 'subtitle' }, 'Rejoignez notre équipe d\'experts et partagez vos connaissances'),
+                    h('div', { className: 'progress-bar' },
+                        h('div', { 
+                            className: 'progress-fill',
+                            style: { width: `${progress}%` }
+                        })
+                    ),
+                    h('div', { className: 'step-indicator' },
+                        steps.map((step, index) =>
+                            h('span', { 
+                                key: step.id,
+                                style: { 
+                                    fontWeight: index === currentStep ? '600' : '400',
+                                    opacity: index === currentStep ? 1 : 0.7
+                                }
+                            }, `${index + 1}. ${step.title}`)
+                        )
+                    )
+                )
+            );
+        }
+
+        // Étape 1: Informations personnelles
+        function PersonalStep({ formData, updateField, errors }) {
+            return h('div', { className: 'step active' },
+                h('h2', { className: 'step-title' }, 'Informations personnelles'),
+                h('p', { className: 'step-description' }, 'Commençons par quelques informations de base sur vous'),
+                
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Prénom ', h('span', { className: 'required' }, '*')),
+                        h('input', {
+                            type: 'text',
+                            value: formData.firstName,
+                            onChange: (e) => updateField('firstName', e.target.value),
+                            className: errors.firstName ? 'error' : (formData.firstName ? 'success' : ''),
+                            placeholder: 'Votre prénom'
+                        }),
+                        errors.firstName && h('div', { className: 'error-message' }, '⚠️ ', errors.firstName)
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Nom ', h('span', { className: 'required' }, '*')),
+                        h('input', {
+                            type: 'text',
+                            value: formData.lastName,
+                            onChange: (e) => updateField('lastName', e.target.value),
+                            className: errors.lastName ? 'error' : (formData.lastName ? 'success' : ''),
+                            placeholder: 'Votre nom'
+                        }),
+                        errors.lastName && h('div', { className: 'error-message' }, '⚠️ ', errors.lastName)
+                    )
+                ),
+                
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Email ', h('span', { className: 'required' }, '*')),
+                        h('input', {
+                            type: 'email',
+                            value: formData.email,
+                            onChange: (e) => updateField('email', e.target.value),
+                            className: errors.email ? 'error' : (formData.email && /\S+@\S+\.\S+/.test(formData.email) ? 'success' : ''),
+                            placeholder: 'votre.email@example.com'
+                        }),
+                        errors.email && h('div', { className: 'error-message' }, '⚠️ ', errors.email)
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Téléphone'),
+                        h('input', {
+                            type: 'tel',
+                            value: formData.phone,
+                            onChange: (e) => updateField('phone', e.target.value),
+                            placeholder: '+33 6 12 34 56 78'
+                        })
+                    )
+                ),
+                
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Pays ', h('span', { className: 'required' }, '*')),
+                        h('select', {
+                            value: formData.country,
+                            onChange: (e) => updateField('country', e.target.value),
+                            className: errors.country ? 'error' : (formData.country ? 'success' : '')
+                        },
+                            h('option', { value: '' }, '-- Sélectionnez votre pays --'),
+                            countries.map(country =>
+                                h('option', { key: country, value: country }, country)
+                            )
+                        ),
+                        errors.country && h('div', { className: 'error-message' }, '⚠️ ', errors.country)
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Ville'),
+                        h('input', {
+                            type: 'text',
+                            value: formData.city,
+                            onChange: (e) => updateField('city', e.target.value),
+                            placeholder: 'Votre ville'
+                        })
+                    )
+                )
+            );
+        }
+
+        // Étape 2: Expérience professionnelle
+        function ProfessionalStep({ formData, updateField, errors, expertiseAreas }) {
+            return h('div', { className: 'step active' },
+                h('h2', { className: 'step-title' }, 'Expérience professionnelle'),
+                h('p', { className: 'step-description' }, 'Partagez votre expertise et votre parcours professionnel'),
+                
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Domaine d\'expertise principal ', h('span', { className: 'required' }, '*')),
+                        h('select', {
+                            value: formData.expertise,
+                            onChange: (e) => updateField('expertise', e.target.value),
+                            className: errors.expertise ? 'error' : (formData.expertise ? 'success' : '')
+                        },
+                            h('option', { value: '' }, '-- Sélectionnez votre domaine --'),
+                            expertiseAreas.map(area =>
+                                h('option', { key: area, value: area }, area)
+                            )
+                        ),
+                        errors.expertise && h('div', { className: 'error-message' }, '⚠️ ', errors.expertise)
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Années d\'expérience ', h('span', { className: 'required' }, '*')),
+                        h('input', {
+                            type: 'number',
+                            min: '1',
+                            max: '50',
+                            value: formData.experienceYears,
+                            onChange: (e) => updateField('experienceYears', e.target.value),
+                            className: errors.experienceYears ? 'error' : (formData.experienceYears ? 'success' : ''),
+                            placeholder: '5'
+                        }),
+                        errors.experienceYears && h('div', { className: 'error-message' }, '⚠️ ', errors.experienceYears)
+                    )
+                ),
+                
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Motivation ', h('span', { className: 'required' }, '*')),
+                    h('textarea', {
+                        value: formData.motivation,
+                        onChange: (e) => updateField('motivation', e.target.value),
+                        className: errors.motivation ? 'error' : (formData.motivation && formData.motivation.length >= 100 ? 'success' : ''),
+                        placeholder: 'Parlez-nous de votre motivation à devenir formateur, de votre approche pédagogique et de ce que vous aimeriez apporter à nos étudiants...',
+                        rows: '6'
+                    }),
+                    h('div', { 
+                        style: { 
+                            fontSize: '0.875rem', 
+                            color: formData.motivation.length >= 100 ? '#10b981' : '#6b7280',
+                            marginTop: '0.5rem'
+                        }
+                    }, `${formData.motivation.length}/100 caractères minimum`),
+                    errors.motivation && h('div', { className: 'error-message' }, '⚠️ ', errors.motivation)
+                ),
+                
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Portfolio / Site web'),
+                        h('input', {
+                            type: 'url',
+                            value: formData.portfolioUrl,
+                            onChange: (e) => updateField('portfolioUrl', e.target.value),
+                            placeholder: 'https://monportfolio.com'
+                        })
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Profil LinkedIn'),
+                        h('input', {
+                            type: 'url',
+                            value: formData.linkedinUrl,
+                            onChange: (e) => updateField('linkedinUrl', e.target.value),
+                            placeholder: 'https://linkedin.com/in/monprofil'
+                        })
+                    )
+                ),
+                
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Tarif horaire souhaité'),
+                        h('div', { style: { display: 'flex', gap: '0.5rem' } },
+                            h('input', {
+                                type: 'number',
+                                min: '0',
+                                step: '5',
+                                value: formData.expectedRate,
+                                onChange: (e) => updateField('expectedRate', e.target.value),
+                                placeholder: '50',
+                                style: { flex: '1' }
+                            }),
+                            h('select', {
+                                value: formData.currency,
+                                onChange: (e) => updateField('currency', e.target.value),
+                                style: { width: '80px' }
+                            },
+                                h('option', { value: 'EUR' }, '€'),
+                                h('option', { value: 'USD' }, '$'),
+                                h('option', { value: 'CAD' }, 'CAD'),
+                                h('option', { value: 'CHF' }, 'CHF')
+                            )
+                        )
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Disponibilités'),
+                        h('textarea', {
+                            value: formData.availability,
+                            onChange: (e) => updateField('availability', e.target.value),
+                            placeholder: 'Ex: Disponible en semaine de 9h à 17h, weekends possibles...',
+                            rows: '3'
+                        })
+                    )
+                )
+            );
+        }
+
+        // Étape 3: Compétences
+        function SkillsStep({ formData, updateField, errors, predefinedSkills, handleSkillToggle }) {
+            return h('div', { className: 'step active' },
+                h('h2', { className: 'step-title' }, 'Compétences techniques'),
+                h('p', { className: 'step-description' }, 'Sélectionnez vos domaines d\'expertise et technologies maîtrisées'),
+                
+                h('div', { className: 'skills-container' },
+                    predefinedSkills.map(skill =>
+                        h('label', {
+                            key: skill,
+                            className: `skill-checkbox ${formData.skills.includes(skill) ? 'selected' : ''}`
+                        },
+                            h('input', {
+                                type: 'checkbox',
+                                checked: formData.skills.includes(skill),
+                                onChange: () => handleSkillToggle(skill)
+                            }),
+                            skill
+                        )
+                    )
+                ),
+                
+                h('div', { className: 'custom-skills' },
+                    h('label', null, 'Autres compétences (séparées par des virgules)'),
+                    h('textarea', {
+                        value: formData.customSkills,
+                        onChange: (e) => updateField('customSkills', e.target.value),
+                        placeholder: 'Docker, Kubernetes, Terraform, etc...',
+                        rows: '3'
+                    })
+                ),
+                
+                errors.skills && h('div', { className: 'error-message' }, '⚠️ ', errors.skills)
+            );
+        }
+
+        // Étape 4: Documents
+        function DocumentsStep({ formData, errors, handleFileUpload }) {
+            return h('div', { className: 'step active' },
+                h('h2', { className: 'step-title' }, 'Documents'),
+                h('p', { className: 'step-description' }, 'Téléchargez vos documents pour compléter votre candidature'),
+                
+                h('div', { className: 'form-group' },
+                    h('label', null, 'CV ', h('span', { className: 'required' }, '*')),
+                    h('div', { className: 'file-upload' },
+                        h('input', {
+                            type: 'file',
+                            className: 'file-input',
+                            accept: '.pdf,.doc,.docx',
+                            onChange: (e) => handleFileUpload('cv', e.target.files[0])
+                        }),
+                        h('div', { 
+                            className: `file-label ${formData.cv ? 'has-file' : ''}` 
+                        },
+                            h('div', { className: 'file-icon' }, 
+                                formData.cv ? '📄' : '📎'
+                            ),
+                            h('div', { className: 'file-text' },
+                                formData.cv ? (
+                                    [
+                                        h('div', { key: 'name', className: 'file-name' }, formData.cv.name),
+                                        h('div', { key: 'size', className: 'file-size' }, 
+                                            `${(formData.cv.size / 1024 / 1024).toFixed(1)} MB`
+                                        )
+                                    ]
+                                ) : (
+                                    [
+                                        h('div', { key: 'text' }, 'Cliquez pour télécharger votre CV'),
+                                        h('div', { key: 'formats', className: 'file-size' }, 'PDF, DOC, DOCX (max 10MB)')
+                                    ]
+                                )
+                            )
+                        )
+                    ),
+                    errors.cv && h('div', { className: 'error-message' }, '⚠️ ', errors.cv)
+                ),
+                
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Lettre de motivation (optionnel)'),
+                    h('div', { className: 'file-upload' },
+                        h('input', {
+                            type: 'file',
+                            className: 'file-input',
+                            accept: '.pdf,.doc,.docx',
+                            onChange: (e) => handleFileUpload('coverLetter', e.target.files[0])
+                        }),
+                        h('div', { 
+                            className: `file-label ${formData.coverLetter ? 'has-file' : ''}` 
+                        },
+                            h('div', { className: 'file-icon' }, 
+                                formData.coverLetter ? '📄' : '📎'
+                            ),
+                            h('div', { className: 'file-text' },
+                                formData.coverLetter ? (
+                                    [
+                                        h('div', { key: 'name', className: 'file-name' }, formData.coverLetter.name),
+                                        h('div', { key: 'size', className: 'file-size' }, 
+                                            `${(formData.coverLetter.size / 1024 / 1024).toFixed(1)} MB`
+                                        )
+                                    ]
+                                ) : (
+                                    [
+                                        h('div', { key: 'text' }, 'Cliquez pour télécharger votre lettre'),
+                                        h('div', { key: 'formats', className: 'file-size' }, 'PDF, DOC, DOCX (max 10MB)')
+                                    ]
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        // Étape 5: Récapitulatif
+        function SummaryStep({ formData }) {
+            const allSkills = [...formData.skills];
+            if (formData.customSkills) {
+                allSkills.push(...formData.customSkills.split(',').map(s => s.trim()).filter(s => s));
+            }
+
+            return h('div', { className: 'step active' },
+                h('h2', { className: 'step-title' }, 'Récapitulatif'),
+                h('p', { className: 'step-description' }, 'Vérifiez vos informations avant de soumettre votre candidature'),
+                
+                h('div', { className: 'summary-section' },
+                    h('h3', { className: 'summary-title' }, 'Informations personnelles'),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Nom complet:'),
+                        h('span', { className: 'summary-value' }, `${formData.firstName} ${formData.lastName}`)
+                    ),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Email:'),
+                        h('span', { className: 'summary-value' }, formData.email)
+                    ),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Localisation:'),
+                        h('span', { className: 'summary-value' }, `${formData.city || '—'}, ${formData.country}`)
+                    )
+                ),
+                
+                h('div', { className: 'summary-section' },
+                    h('h3', { className: 'summary-title' }, 'Expérience professionnelle'),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Expertise:'),
+                        h('span', { className: 'summary-value' }, formData.expertise)
+                    ),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Expérience:'),
+                        h('span', { className: 'summary-value' }, `${formData.experienceYears} années`)
+                    ),
+                    formData.expectedRate && h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Tarif souhaité:'),
+                        h('span', { className: 'summary-value' }, `${formData.expectedRate} ${formData.currency}/h`)
+                    )
+                ),
+                
+                h('div', { className: 'summary-section' },
+                    h('h3', { className: 'summary-title' }, 'Compétences'),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Technologies:'),
+                        h('span', { className: 'summary-value' }, allSkills.join(', ') || '—')
+                    )
+                ),
+                
+                h('div', { className: 'summary-section' },
+                    h('h3', { className: 'summary-title' }, 'Documents'),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'CV:'),
+                        h('span', { className: 'summary-value' }, formData.cv ? '✅ Téléchargé' : '❌ Manquant')
+                    ),
+                    h('div', { className: 'summary-item' },
+                        h('span', { className: 'summary-label' }, 'Lettre de motivation:'),
+                        h('span', { className: 'summary-value' }, formData.coverLetter ? '✅ Téléchargé' : '— Optionnel')
+                    )
+                )
+            );
+        }
+
+        // Composant Actions
+        function Actions({ currentStep, stepsLength, nextStep, prevStep, submitApplication, isSubmitting, errors }) {
+            const isLastStep = currentStep === stepsLength - 1;
+
+            return h('div', { className: 'actions' },
+                h('div', null,
+                    currentStep > 0 && h('button', {
+                        type: 'button',
+                        className: 'btn btn-secondary',
+                        onClick: prevStep,
+                        disabled: isSubmitting
+                    }, '← Précédent')
+                ),
+                h('div', null,
+                    isLastStep ? (
+                        h('button', {
+                            type: 'button',
+                            className: 'btn btn-primary',
+                            onClick: submitApplication,
+                            disabled: isSubmitting
+                        },
+                            isSubmitting ? h('span', { className: 'loading' },
+                                h('span', { className: 'spinner' }),
+                                'Envoi en cours...'
+                            ) : '🚀 Envoyer ma candidature'
+                        )
+                    ) : (
+                        h('button', {
+                            type: 'button',
+                            className: 'btn btn-primary',
+                            onClick: nextStep
+                        }, 'Suivant →')
+                    )
+                ),
+                errors.submit && h('div', { 
+                    style: { 
+                        color: '#ef4444', 
+                        fontSize: '0.9rem',
+                        textAlign: 'center',
+                        marginTop: '1rem'
+                    }
+                }, errors.submit)
+            );
+        }
+
+        // Composant Success Message
+        function SuccessMessage() {
+            return h('div', { className: 'application-container' },
+                h('div', { className: 'success-animation' },
+                    h('div', { className: 'success-icon' }, '🎉'),
+                    h('h1', { className: 'step-title' }, 'Candidature envoyée !'),
+                    h('p', { className: 'step-description', style: { marginBottom: '2rem' } }, 
+                        'Merci pour votre candidature. Notre équipe va l\'examiner et vous recontactera sous 48-72h.'
+                    ),
+                    h('div', { style: { background: '#f0fdf4', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem' } },
+                        h('h3', { style: { color: '#065f46', marginBottom: '1rem' } }, 'Prochaines étapes:'),
+                        h('ul', { style: { textAlign: 'left', color: '#059669' } },
+                            h('li', { style: { marginBottom: '0.5rem' } }, '✅ Réception et analyse de votre dossier'),
+                            h('li', { style: { marginBottom: '0.5rem' } }, '📞 Entretien téléphonique si présélectionné'),
+                            h('li', { style: { marginBottom: '0.5rem' } }, '🎯 Test technique éventuel'),
+                            h('li', null, '🤝 Intégration dans notre équipe')
+                        )
+                    ),
+                    h('button', {
+                        className: 'btn btn-primary',
+                        onClick: () => window.location.href = '/'
+                    }, '← Retour à l\'accueil')
+                )
+            );
+        }
+
+        // Rendu de l'application
+        ReactDOM.render(
+            React.createElement(TrainerApplication),
+            document.getElementById('trainer-application')
+        );
+    </script>
+</body>
+</html>

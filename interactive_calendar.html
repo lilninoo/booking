@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier de Planification - TBM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .calendar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-left p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .view-selector {
+            display: flex;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .view-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+        }
+
+        .calendar-navigation {
+            background: #f8fafb;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .nav-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .current-period {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .today-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .today-btn:hover {
+            background: #5a67d8;
+        }
+
+        .calendar-content {
+            padding: 2rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .calendar-header-cell {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            background: #f0f4ff;
+        }
+
+        .calendar-day.other-month {
+            background: #f9fafb;
+            color: #9ca3af;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .calendar-day.selected {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+        }
+
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .day-events {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+
+        .event {
+            background: #10b981;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .event:hover {
+            transform: scale(1.05);
+        }
+
+        .event.session {
+            background: #3b82f6;
+        }
+
+        .event.bootcamp {
+            background: #8b5cf6;
+        }
+
+        .event.meeting {
+            background: #f59e0b;
+        }
+
+        .event.unavailable {
+            background: #ef4444;
+        }
+
+        .more-events {
+            font-size: 0.7rem;
+            color: #6b7280;
+            text-align: center;
+            padding: 2px;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-content {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .trainer-selector {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .trainer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .trainer-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .trainer-item:hover {
+            background: #f0f4ff;
+        }
+
+        .trainer-item.selected {
+            border-color: #667eea;
+            background: #dbeafe;
+        }
+
+        .trainer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .trainer-info h4 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .trainer-info p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .availability-status {
+            margin-left: auto;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .availability-status.available {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .availability-status.busy {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .availability-status.unavailable {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .event-details {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .event-details h3 {
+            color: #1f2937;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-secondary {
+            background: #f9fafb;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .legend {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .calendar-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .calendar-navigation {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .calendar-grid {
+                gap: 0;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 0.25rem;
+            }
+
+            .sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="calendar-app"></div>
+
+    <script>
+        const { useState, useEffect, createElement: h } = React;
+
+        // Données de démonstration
+        const mockData = {
+            trainers: [
+                {
+                    id: 1,
+                    name: "Marie Dubois",
+                    expertise: "Développement Web",
+                    availability: "available",
+                    avatar: "MD",
+                    sessions_count: 15
+                },
+                {
+                    id: 2,
+                    name: "Ahmed Ben Ali",
+                    expertise: "Data Science",
+                    availability: "busy",
+                    avatar: "AB",
+                    sessions_count: 8
+                },
+                {
+                    id: 3,
+                    name: "Sophie Martin",
+                    expertise: "UX/UI Design",
+                    availability: "available",
+                    avatar: "SM",
+                    sessions_count: 12
+                }
+            ],
+            events: [
+                {
+                    id: 1,
+                    title: "React.js Avancé",
+                    type: "session",
+                    trainer_id: 1,
+                    date: "2024-06-25",
+                    start_time: "09:00",
+                    end_time: "12:00",
+                    bootcamp: "Bootcamp Full Stack",
+                    participants: 15,
+                    status: "scheduled"
+                },
+                {
+                    id: 2,
+                    title: "Analyse de données",
+                    type: "session",
+                    trainer_id: 2,
+                    date: "2024-06-26",
+                    start_time: "14:00",
+                    end_time: "17:00",
+                    bootcamp: "Bootcamp Data Science",
+                    participants: 12,
+                    status: "scheduled"
+                },
+                {
+                    id: 3,
+                    title: "Workshop Design",
+                    type: "session",
+                    trainer_id: 3,
+                    date: "2024-06-27",
+                    start_time: "10:00",
+                    end_time: "16:00",
+                    bootcamp: "Bootcamp UX/UI",
+                    participants: 10,
+                    status: "scheduled"
+                }
+            ]
+        };
+
+        // Types d'événements avec couleurs
+        const eventTypes = {
+            session: { label: "Session", color: "#3b82f6" },
+            bootcamp: { label: "Bootcamp", color: "#8b5cf6" },
+            meeting: { label: "Réunion", color: "#f59e0b" },
+            unavailable: { label: "Indisponible", color: "#ef4444" }
+        };
+
+        // Composant principal du calendrier
+        function CalendarApp() {
+            const [currentDate, setCurrentDate] = useState(new Date());
+            const [selectedDate, setSelectedDate] = useState(null);
+            const [viewMode, setViewMode] = useState('month');
+            const [events, setEvents] = useState(mockData.events);
+            const [trainers, setTrainers] = useState(mockData.trainers);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [sidebarMode, setSidebarMode] = useState('create'); // 'create' or 'view'
+            const [selectedEvent, setSelectedEvent] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [isLoading, setIsLoading] = useState(false);
+
+            // Forme de l'événement pour la création/édition
+            const [eventForm, setEventForm] = useState({
+                title: '',
+                type: 'session',
+                trainer_id: '',
+                date: '',
+                start_time: '',
+                end_time: '',
+                description: '',
+                participants: '',
+                bootcamp: '',
+                location: ''
+            });
+
+            const updateEventForm = (field, value) => {
+                setEventForm(prev => ({ ...prev, [field]: value }));
+            };
+
+            const resetEventForm = () => {
+                setEventForm({
+                    title: '',
+                    type: 'session',
+                    trainer_id: '',
+                    date: '',
+                    start_time: '',
+                    end_time: '',
+                    description: '',
+                    participants: '',
+                    bootcamp: '',
+                    location: ''
+                });
+            };
+
+            const openCreateEventSidebar = (date = null) => {
+                if (date) {
+                    updateEventForm('date', date);
+                }
+                setSidebarMode('create');
+                resetEventForm();
+                setSidebarOpen(true);
+            };
+
+            const openViewEventSidebar = (event) => {
+                setSelectedEvent(event);
+                setSidebarMode('view');
+                setSidebarOpen(true);
+            };
+
+            const closeSidebar = () => {
+                setSidebarOpen(false);
+                setSelectedEvent(null);
+                resetEventForm();
+            };
+
+            const handleDayClick = (date) => {
+                setSelectedDate(date);
+                openCreateEventSidebar(formatDate(date));
+            };
+
+            const handleEventClick = (event, e) => {
+                e.stopPropagation();
+                openViewEventSidebar(event);
+            };
+
+            const navigateMonth = (direction) => {
+                setCurrentDate(prev => {
+                    const newDate = new Date(prev);
+                    newDate.setMonth(prev.getMonth() + direction);
+                    return newDate;
+                });
+            };
+
+            const goToToday = () => {
+                setCurrentDate(new Date());
+                setSelectedDate(null);
+            };
+
+            const saveEvent = async () => {
+                setIsLoading(true);
+                
+                try {
+                    // Simulation d'appel API
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const newEvent = {
+                        id: Date.now(),
+                        ...eventForm,
+                        status: 'scheduled'
+                    };
+                    
+                    setEvents(prev => [...prev, newEvent]);
+                    closeSidebar();
+                    
+                    console.log('Événement créé:', newEvent);
+                } catch (error) {
+                    console.error('Erreur:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const deleteEvent = async (eventId) => {
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                    return;
+                }
+
+                setIsLoading(true);
+                
+                try {
+                    // Simulation d'appel API
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    setEvents(prev => prev.filter(e => e.id !== eventId));
+                    closeSidebar();
+                } catch (error) {
+                    console.error('Erreur:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            return h('div', { className: 'calendar-container' },
+                h(CalendarHeader, {
+                    viewMode,
+                    setViewMode,
+                    onCreateEvent: openCreateEventSidebar
+                }),
+                h(CalendarNavigation, {
+                    currentDate,
+                    navigateMonth,
+                    goToToday,
+                    viewMode
+                }),
+                h('div', { className: 'calendar-content' },
+                    h(Legend),
+                    viewMode === 'month' && h(MonthView, {
+                        currentDate,
+                        selectedDate,
+                        events,
+                        trainers,
+                        onDayClick: handleDayClick,
+                        onEventClick: handleEventClick
+                    })
+                ),
+                h(Sidebar, {
+                    open: sidebarOpen,
+                    mode: sidebarMode,
+                    selectedEvent,
+                    eventForm,
+                    trainers,
+                    updateEventForm,
+                    onClose: closeSidebar,
+                    onSave: saveEvent,
+                    onDelete: deleteEvent,
+                    isLoading
+                })
+            );
+        }
+
+        // En-tête du calendrier
+        function CalendarHeader({ viewMode, setViewMode, onCreateEvent }) {
+            return h('div', { className: 'calendar-header' },
+                h('div', { className: 'header-left' },
+                    h('h1', null, '📅 Calendrier de Planification'),
+                    h('p', null, 'Gérez vos sessions et bootcamps')
+                ),
+                h('div', { className: 'header-controls' },
+                    h('div', { className: 'view-selector' },
+                        ['month', 'week', 'day'].map(view =>
+                            h('button', {
+                                key: view,
+                                className: `view-btn ${viewMode === view ? 'active' : ''}`,
+                                onClick: () => setViewMode(view)
+                            }, capitalize(view))
+                        )
+                    ),
+                    h('button', {
+                        className: 'btn btn-primary',
+                        onClick: () => onCreateEvent()
+                    }, '+ Nouvel événement')
+                )
+            );
+        }
+
+        // Navigation du calendrier
+        function CalendarNavigation({ currentDate, navigateMonth, goToToday, viewMode }) {
+            const monthNames = [
+                'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+            ];
+
+            const currentPeriod = viewMode === 'month' 
+                ? `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`
+                : formatDate(currentDate);
+
+            return h('div', { className: 'calendar-navigation' },
+                h('button', {
+                    className: 'nav-btn',
+                    onClick: () => navigateMonth(-1)
+                }, '‹ Précédent'),
+                
+                h('div', { className: 'current-period' }, currentPeriod),
+                
+                h('div', { style: { display: 'flex', gap: '1rem' } },
+                    h('button', {
+                        className: 'today-btn',
+                        onClick: goToToday
+                    }, 'Aujourd\'hui'),
+                    h('button', {
+                        className: 'nav-btn',
+                        onClick: () => navigateMonth(1)
+                    }, 'Suivant ›')
+                )
+            );
+        }
+
+        // Légende des couleurs
+        function Legend() {
+            return h('div', { className: 'legend' },
+                Object.entries(eventTypes).map(([type, config]) =>
+                    h('div', { key: type, className: 'legend-item' },
+                        h('div', {
+                            className: 'legend-color',
+                            style: { backgroundColor: config.color }
+                        }),
+                        h('span', { className: 'legend-label' }, config.label)
+                    )
+                )
+            );
+        }
+
+        // Vue mensuelle
+        function MonthView({ currentDate, selectedDate, events, trainers, onDayClick, onEventClick }) {
+            const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startDate = new Date(monthStart);
+            startDate.setDate(startDate.getDate() - monthStart.getDay());
+
+            const days = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Générer les jours du calendrier
+            for (let i = 0; i < 42; i++) {
+                const currentDay = new Date(startDate);
+                currentDay.setDate(startDate.getDate() + i);
+                
+                const dayEvents = events.filter(event => 
+                    event.date === formatDate(currentDay)
+                );
+
+                const isToday = currentDay.getTime() === today.getTime();
+                const isCurrentMonth = currentDay.getMonth() === currentDate.getMonth();
+                const isSelected = selectedDate && currentDay.getTime() === new Date(selectedDate).getTime();
+
+                days.push(
+                    h(CalendarDay, {
+                        key: i,
+                        date: currentDay,
+                        events: dayEvents,
+                        trainers,
+                        isToday,
+                        isCurrentMonth,
+                        isSelected,
+                        onClick: onDayClick,
+                        onEventClick
+                    })
+                );
+            }
+
+            return h('div', { className: 'calendar-grid' },
+                // En-têtes des jours de la semaine
+                ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map(day =>
+                    h('div', { key: day, className: 'calendar-header-cell' }, day)
+                ),
+                // Jours du calendrier
+                ...days
+            );
+        }
+
+        // Jour du calendrier
+        function CalendarDay({ date, events, trainers, isToday, isCurrentMonth, isSelected, onClick, onEventClick }) {
+            let className = 'calendar-day';
+            if (!isCurrentMonth) className += ' other-month';
+            if (isToday) className += ' today';
+            if (isSelected) className += ' selected';
+
+            const maxVisibleEvents = 3;
+            const visibleEvents = events.slice(0, maxVisibleEvents);
+            const hiddenEventsCount = events.length - maxVisibleEvents;
+
+            return h('div', {
+                className,
+                onClick: () => onClick(date)
+            },
+                h('div', { className: 'day-number' }, date.getDate()),
+                h('div', { className: 'day-events' },
+                    visibleEvents.map(event => {
+                        const trainer = trainers.find(t => t.id === event.trainer_id);
+                        const eventType = eventTypes[event.type] || eventTypes.session;
+                        
+                        return h('div', {
+                            key: event.id,
+                            className: `event ${event.type}`,
+                            style: { backgroundColor: eventType.color },
+                            onClick: (e) => onEventClick(event, e),
+                            title: `${event.title} - ${trainer?.name || 'N/A'}`
+                        }, event.title);
+                    }),
+                    hiddenEventsCount > 0 && h('div', { className: 'more-events' }, 
+                        `+${hiddenEventsCount} autres`
+                    )
+                )
+            );
+        }
+
+        // Sidebar pour créer/voir les événements
+        function Sidebar({ open, mode, selectedEvent, eventForm, trainers, updateEventForm, onClose, onSave, onDelete, isLoading }) {
+            const sidebarClass = `sidebar ${open ? 'open' : ''}`;
+
+            return h('div', { className: sidebarClass },
+                h('div', { className: 'sidebar-header' },
+                    h('div', { className: 'sidebar-title' },
+                        mode === 'create' ? 'Nouvel événement' : 'Détails de l\'événement'
+                    ),
+                    h('button', {
+                        className: 'close-btn',
+                        onClick: onClose
+                    }, '×')
+                ),
+                h('div', { className: 'sidebar-content' },
+                    mode === 'create' ? h(CreateEventForm, {
+                        eventForm,
+                        trainers,
+                        updateEventForm,
+                        onSave,
+                        isLoading
+                    }) : h(ViewEventDetails, {
+                        event: selectedEvent,
+                        trainers,
+                        onDelete,
+                        isLoading
+                    })
+                )
+            );
+        }
+
+        // Formulaire de création d'événement
+        function CreateEventForm({ eventForm, trainers, updateEventForm, onSave, isLoading }) {
+            const canSave = eventForm.title && eventForm.trainer_id && eventForm.date && eventForm.start_time && eventForm.end_time;
+
+            return h('div', null,
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Titre *'),
+                    h('input', {
+                        type: 'text',
+                        value: eventForm.title,
+                        onChange: (e) => updateEventForm('title', e.target.value),
+                        placeholder: 'Nom de l\'événement'
+                    })
+                ),
+
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Type d\'événement'),
+                    h('select', {
+                        value: eventForm.type,
+                        onChange: (e) => updateEventForm('type', e.target.value)
+                    },
+                        Object.entries(eventTypes).map(([type, config]) =>
+                            h('option', { key: type, value: type }, config.label)
+                        )
+                    )
+                ),
+
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Formateur *'),
+                    h(TrainerSelector, {
+                        trainers,
+                        selectedTrainerId: eventForm.trainer_id,
+                        onSelect: (trainerId) => updateEventForm('trainer_id', trainerId)
+                    })
+                ),
+
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Date *'),
+                    h('input', {
+                        type: 'date',
+                        value: eventForm.date,
+                        onChange: (e) => updateEventForm('date', e.target.value)
+                    })
+                ),
+
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Heure début *'),
+                        h('input', {
+                            type: 'time',
+                            value: eventForm.start_time,
+                            onChange: (e) => updateEventForm('start_time', e.target.value)
+                        })
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Heure fin *'),
+                        h('input', {
+                            type: 'time',
+                            value: eventForm.end_time,
+                            onChange: (e) => updateEventForm('end_time', e.target.value)
+                        })
+                    )
+                ),
+
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Bootcamp/Programme'),
+                    h('input', {
+                        type: 'text',
+                        value: eventForm.bootcamp,
+                        onChange: (e) => updateEventForm('bootcamp', e.target.value),
+                        placeholder: 'Bootcamp Full Stack'
+                    })
+                ),
+
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Participants'),
+                        h('input', {
+                            type: 'number',
+                            value: eventForm.participants,
+                            onChange: (e) => updateEventForm('participants', e.target.value),
+                            placeholder: '15'
+                        })
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', null, 'Lieu'),
+                        h('input', {
+                            type: 'text',
+                            value: eventForm.location,
+                            onChange: (e) => updateEventForm('location', e.target.value),
+                            placeholder: 'En ligne / Salle A'
+                        })
+                    )
+                ),
+
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Description'),
+                    h('textarea', {
+                        value: eventForm.description,
+                        onChange: (e) => updateEventForm('description', e.target.value),
+                        placeholder: 'Description de l\'événement...',
+                        rows: 4
+                    })
+                ),
+
+                h('div', { className: 'action-buttons' },
+                    h('button', {
+                        className: 'btn btn-primary',
+                        onClick: onSave,
+                        disabled: !canSave || isLoading
+                    },
+                        isLoading ? h('div', { className: 'loading' },
+                            h('div', { className: 'spinner' }),
+                            'Création...'
+                        ) : 'Créer l\'événement'
+                    )
+                )
+            );
+        }
+
+        // Sélecteur de formateur
+        function TrainerSelector({ trainers, selectedTrainerId, onSelect }) {
+            return h('div', { className: 'trainer-selector' },
+                h('div', { className: 'trainer-list' },
+                    trainers.map(trainer =>
+                        h('div', {
+                            key: trainer.id,
+                            className: `trainer-item ${selectedTrainerId === trainer.id ? 'selected' : ''}`,
+                            onClick: () => onSelect(trainer.id)
+                        },
+                            h('div', { className: 'trainer-avatar' }, trainer.avatar),
+                            h('div', { className: 'trainer-info' },
+                                h('h4', null, trainer.name),
+                                h('p', null, trainer.expertise)
+                            ),
+                            h('div', {
+                                className: `availability-status ${trainer.availability}`
+                            }, getAvailabilityText(trainer.availability))
+                        )
+                    )
+                )
+            );
+        }
+
+        // Détails de l'événement
+        function ViewEventDetails({ event, trainers, onDelete, isLoading }) {
+            if (!event) return null;
+
+            const trainer = trainers.find(t => t.id === event.trainer_id);
+
+            return h('div', null,
+                h('div', { className: 'event-details' },
+                    h('h3', null, event.title),
+                    h('div', { className: 'detail-row' },
+                        h('span', { className: 'detail-label' }, 'Type:'),
+                        h('span', { className: 'detail-value' }, eventTypes[event.type]?.label || event.type)
+                    ),
+                    h('div', { className: 'detail-row' },
+                        h('span', { className: 'detail-label' }, 'Formateur:'),
+                        h('span', { className: 'detail-value' }, trainer?.name || 'N/A')
+                    ),
+                    h('div', { className: 'detail-row' },
+                        h('span', { className: 'detail-label' }, 'Date:'),
+                        h('span', { className: 'detail-value' }, formatDateLong(event.date))
+                    ),
+                    h('div', { className: 'detail-row' },
+                        h('span', { className: 'detail-label' }, 'Horaire:'),
+                        h('span', { className: 'detail-value' }, `${event.start_time} - ${event.end_time}`)
+                    ),
+                    event.bootcamp && h('div', { className: 'detail-row' },
+                        h('span', { className: 'detail-label' }, 'Programme:'),
+                        h('span', { className: 'detail-value' }, event.bootcamp)
+                    ),
+                    event.participants && h('div', { className: 'detail-row' },
+                        h('span', { className: 'detail-label' }, 'Participants:'),
+                        h('span', { className: 'detail-value' }, event.participants)
+                    ),
+                    h('div', { className: 'detail-row' },
+                        h('span', { className: 'detail-label' }, 'Statut:'),
+                        h('span', { className: 'detail-value' }, getStatusText(event.status))
+                    )
+                ),
+
+                h('div', { className: 'action-buttons' },
+                    h('button', {
+                        className: 'btn btn-secondary'
+                    }, 'Modifier'),
+                    h('button', {
+                        className: 'btn btn-danger',
+                        onClick: () => onDelete(event.id),
+                        disabled: isLoading
+                    },
+                        isLoading ? 'Suppression...' : 'Supprimer'
+                    )
+                )
+            );
+        }
+
+        // Fonctions utilitaires
+        function formatDate(date) {
+            const d = new Date(date);
+            return d.toISOString().split('T')[0];
+        }
+
+        function formatDateLong(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function getAvailabilityText(availability) {
+            const texts = {
+                available: 'Disponible',
+                busy: 'Occupé',
+                unavailable: 'Indisponible'
+            };
+            return texts[availability] || availability;
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                scheduled: 'Planifié',
+                completed: 'Terminé',
+                cancelled: 'Annulé',
+                in_progress: 'En cours'
+            };
+            return texts[status] || status;
+        }
+
+        // Rendu de l'application
+        ReactDOM.render(
+            React.createElement(CalendarApp),
+            document.getElementById('calendar-app')
+        );
+    </script>
+</body>
+</html>
